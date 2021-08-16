@@ -62,28 +62,39 @@ func (s *SqlResult) Contains(row string) bool {
 	return ok
 }
 
-func (s *SqlResult) NonOrderEqualTo(another *SqlResult) bool {
+func (s *SqlResult) NonOrderEqualTo(another *SqlResult, ci bool) bool {
 	if len(s.Rows) != len(another.Rows) {
 		return false
 	}
-
+	if ci {
+		rowsTmp := make(map[string]bool)
+		for row := range s.Rows {
+			rowsTmp[strings.ToLower(row)] = true
+		}
+		for row := range another.Rows {
+			_, ok := rowsTmp[strings.ToLower(row)]
+			if !ok {
+				return false
+			}
+		}
+		return true
+	}
 	for row := range another.Rows {
 		if !s.Contains(row) {
 			return false
 		}
 	}
-
 	return true
 }
 
 // if s is equal to another, will return true
-func (s *SqlResult) BytesEqualTo(another *SqlResult) bool {
+func (s *SqlResult) BytesEqualTo(another *SqlResult, ci bool) bool {
 	if len(s.Data) != len(another.Data) {
 		return false
 	}
 
 	for i := range s.Data {
-		if !s.RowBytesEqualTo(another, i, another.Data[i]) {
+		if !s.RowBytesEqualTo(another, i, another.Data[i], ci) {
 			return false
 		}
 	}
@@ -91,7 +102,7 @@ func (s *SqlResult) BytesEqualTo(another *SqlResult) bool {
 	return true
 }
 
-func (s *SqlResult) RowBytesEqualTo(another *SqlResult, r int, row [][]byte) bool {
+func (s *SqlResult) RowBytesEqualTo(another *SqlResult, r int, row [][]byte, ci bool) bool {
 	row1 := s.Data[r]
 	row2 := row
 	if len(row1) != len(row2) {
@@ -99,7 +110,7 @@ func (s *SqlResult) RowBytesEqualTo(another *SqlResult, r int, row [][]byte) boo
 	}
 
 	for i := range row1 {
-		if !s.ColBytesEqualTo(another, r, i, row[i]) {
+		if !s.ColBytesEqualTo(another, r, i, row[i], ci) {
 			return false
 		}
 	}
@@ -107,7 +118,7 @@ func (s *SqlResult) RowBytesEqualTo(another *SqlResult, r int, row [][]byte) boo
 	return true
 }
 
-func (s *SqlResult) ColBytesEqualTo(another *SqlResult, r, c int, col []byte) bool {
+func (s *SqlResult) ColBytesEqualTo(another *SqlResult, r, c int, col []byte, ci bool) bool {
 	col1 := s.Data[r][c]
 	col2 := col
 	// all NULL
@@ -118,7 +129,10 @@ func (s *SqlResult) ColBytesEqualTo(another *SqlResult, r, c int, col []byte) bo
 	if len(col1) != len(col2) {
 		return false
 	}
-
+	// collation case insensitive
+	if ci {
+		return bytes.EqualFold(col1, col2)
+	}
 	return bytes.Equal(col1, col2)
 }
 

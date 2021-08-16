@@ -32,6 +32,11 @@ func newQueryDsnRes(db *sql.DB, sql string) *QueryDsnRes {
 	return &QueryDsnRes{result, err}
 }
 
+func NewQueryDsnRes2(db *sql.DB, sql string) *QueryDsnRes {
+	result, err := query(db, sql)
+	return &QueryDsnRes{result, err}
+}
+
 type execDsnRes struct {
 	rowsAffected int64
 	err          error
@@ -52,21 +57,21 @@ func newExecDsnRes(db *sql.DB, sql string) *execDsnRes {
 
 type Visitor func(sql string, dsn1Res DsnRes, dsn2Res DsnRes) error
 
-func ByDsn(sqls []string, dsn1 string, dsn2 string, nonOrder bool, visitor Visitor) error {
-
-	db1, err := cache.initDb(dsn1)
-	if err != nil {
-		return err
-	}
-
-	db2, err := cache.initDb(dsn2)
-	if err != nil {
-		return err
-	}
-
-	return ByDb(sqls, db1, db2, nonOrder, visitor)
-}
-
+//func ByDsn(sqls []string, dsn1 string, dsn2 string, nonOrder bool, visitor Visitor) error {
+//
+//	db1, err := cache.initDb(dsn1)
+//	if err != nil {
+//		return err
+//	}
+//
+//	db2, err := cache.initDb(dsn2)
+//	if err != nil {
+//		return err
+//	}
+//
+//	return ByDb(sqls, db1, db2, nonOrder, visitor)
+//}
+//
 func ByDb(sqls []string, db1 *sql.DB, db2 *sql.DB, nonOrder bool, visitor Visitor) error {
 
 	for _, sql := range sqls {
@@ -74,7 +79,7 @@ func ByDb(sqls []string, db1 *sql.DB, db2 *sql.DB, nonOrder bool, visitor Visito
 			continue
 		}
 
-		consistent, dsn1Res, dsn2Res := BySql(sql, db1, db2, nonOrder)
+		consistent, dsn1Res, dsn2Res := BySql(sql, db1, db2, nonOrder, false)
 
 		if !consistent {
 			if err := visitor(sql, dsn1Res, dsn2Res); err != nil {
@@ -86,16 +91,16 @@ func ByDb(sqls []string, db1 *sql.DB, db2 *sql.DB, nonOrder bool, visitor Visito
 	return nil
 }
 
-func BySql(sql string, db1 *sql.DB, db2 *sql.DB, nonOrder bool) (consistent bool, dsn1Res DsnRes,
+func BySql(sql string, db1 *sql.DB, db2 *sql.DB, nonOrder bool, ci bool) (consistent bool, dsn1Res DsnRes,
 	dsn2Res DsnRes) {
 	if isExec(sql) {
 		return ByExec(sql, db1, db2)
 	} else {
-		return ByQuery(sql, db1, db2, nonOrder)
+		return ByQuery(sql, db1, db2, nonOrder, ci)
 	}
 }
 
-func ByQuery(sql string, db1 *sql.DB, db2 *sql.DB, nonOrder bool) (consistent bool, dsn1Res DsnRes,
+func ByQuery(sql string, db1 *sql.DB, db2 *sql.DB, nonOrder bool, ci bool) (consistent bool, dsn1Res DsnRes,
 	dsn2Res DsnRes) {
 
 	var res1 *QueryDsnRes
@@ -134,16 +139,16 @@ func ByQuery(sql string, db1 *sql.DB, db2 *sql.DB, nonOrder bool) (consistent bo
 
 	// err all not nil, think it is consistent without need to compare
 	if res1.err != nil && res2.err != nil {
-		return true, res1, res2
+		return false, res1, res2
 	}
 
 	// compare
 	if nonOrder {
-		if !res1.Res.NonOrderEqualTo(res2.Res) {
+		if !res1.Res.NonOrderEqualTo(res2.Res, ci) {
 			return false, res1, res2
 		}
 	} else {
-		if !res1.Res.BytesEqualTo(res2.Res) {
+		if !res1.Res.BytesEqualTo(res2.Res, ci) {
 			return false, res1, res2
 		}
 	}

@@ -176,15 +176,12 @@ func TestRuneSeq(t *testing.T) {
 }
 
 func TestSimpleTokenPrint(t *testing.T) {
-	t.SkipNow()
+	//t.SkipNow()
 	origin := `
-{
--- {
---[==[
-}
-]==]
-asd
-}
+ex:
+  hello
+ex:函(a,b)函
+  函数 函数 a,b
 `
 
 	next := Tokenize(&RuneSeq{Runes: []rune(origin)})
@@ -194,6 +191,8 @@ asd
 
 		fmt.Println("=========")
 		fmt.Printf("%T\n", tkn)
+		a := tkn.OriginString()
+		fmt.Println(a)
 		fmt.Println(tkn.OriginString())
 
 		if isEOF(tkn) {

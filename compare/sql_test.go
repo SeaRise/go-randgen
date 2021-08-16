@@ -12,8 +12,8 @@ import (
 
 func TestSqlResult_BytesEqualTo(t *testing.T) {
 	var mockRes1 = &SqlResult{
-		Header:[]string{"aaa", "bbbb"},
-		Data:[][][]byte{
+		Header: []string{"aaa", "bbbb"},
+		Data: [][][]byte{
 			{
 				[]byte("haha"),
 				[]byte("baba"),
@@ -26,8 +26,8 @@ func TestSqlResult_BytesEqualTo(t *testing.T) {
 	}
 
 	var mockRes2 = &SqlResult{
-		Header:[]string{"aaa", "bbbb"},
-		Data:[][][]byte{
+		Header: []string{"aaa", "bbbb"},
+		Data: [][][]byte{
 			{
 				[]byte("haha"),
 				[]byte("baba"),
@@ -40,8 +40,8 @@ func TestSqlResult_BytesEqualTo(t *testing.T) {
 	}
 
 	var mockRes3 = &SqlResult{
-		Header:[]string{"aaa", "bbbb"},
-		Data:[][][]byte{
+		Header: []string{"aaa", "bbbb"},
+		Data: [][][]byte{
 			{
 				[]byte("mmmm"),
 				[]byte("popo"),
@@ -53,8 +53,8 @@ func TestSqlResult_BytesEqualTo(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, true, mockRes1.BytesEqualTo(mockRes2))
-	assert.Equal(t, false, mockRes1.BytesEqualTo(mockRes3))
+	assert.Equal(t, true, mockRes1.BytesEqualTo(mockRes2, false))
+	assert.Equal(t, false, mockRes1.BytesEqualTo(mockRes3, false))
 }
 
 func TestQuery(t *testing.T) {
@@ -66,6 +66,7 @@ func TestQuery(t *testing.T) {
 	mock1Rows.AddRow("", nil, "ojji")
 	mock1Rows.AddRow("poi", 10, "drr")
 	mock1Rows.AddRow("fd", 765, "dewrtty")
+	mock1Rows.AddRow("dd", 666, "jld")
 
 	q1 := "select test1"
 
@@ -75,6 +76,7 @@ func TestQuery(t *testing.T) {
 |      | NULL | ojji    |
 | poi  | 10   | drr     |
 | fd   | 765  | dewrtty |
+| dd   | 666  | jld     |
 +-----------------------+`
 
 	mock.ExpectQuery(q1).
@@ -84,6 +86,8 @@ func TestQuery(t *testing.T) {
 	mock2Rows.AddRow("fd", 765, "dewrtty")
 	mock2Rows.AddRow("", nil, "ojji")
 	mock2Rows.AddRow("poi", 10, "drr")
+	mock2Rows.AddRow("poi", 10, "drr")
+
 	q2 := "select test1"
 
 	mock.ExpectQuery(q2).
@@ -97,8 +101,8 @@ func TestQuery(t *testing.T) {
 
 	assert.Equal(t, expected1, r1.String())
 
-	assert.Equal(t, true, r1.NonOrderEqualTo(r2))
-	assert.Equal(t, false, r1.BytesEqualTo(r2))
+	assert.Equal(t, false, r1.NonOrderEqualTo(r2, false))
+	assert.Equal(t, false, r1.BytesEqualTo(r2, false))
 }
 
 func getMockDb(t *testing.T, expects []string) *sql.DB {
@@ -147,10 +151,7 @@ func TestExecSqlsInDbs(t *testing.T) {
 
 }
 
-
-
-
-func TestQueryMysql(t *testing.T)  {
+func TestQueryMysql(t *testing.T) {
 	t.SkipNow()
 	db, err := OpenDBWithRetry("mysql", "root:123456@tcp(127.0.0.1:3306)/randgen")
 	assert.Equal(t, nil, err)

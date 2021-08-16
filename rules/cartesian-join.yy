@@ -86,6 +86,7 @@ num_expression:
     | common_field rlike common_value
     | common_field not rlike common_value
     | num_func(num_field)
+    | strcmp(common_field,common_field)
 
 # 关联 expression
 associate_expression:
@@ -109,6 +110,7 @@ associate_expression:
     | t1. _field rlike common_value
     | t1. _field not rlike common_value
     | num_func(t1. _field_int)
+    | strcmp(t1. _field,common_field)
 
 aggregation_expression:
     x
@@ -131,6 +133,7 @@ aggregation_expression:
     | x rlike common_value
     | x not rlike common_value
     | num_func(x)
+    | strcmp(x ,common_field)
 
 aggregation_condition:
     aggregation_expression
@@ -273,3 +276,5 @@ sub_query_modifier:
 order_by_limit1:
     order by pk desc limit 1
     | order by pk asc limit 1
+    | order by pk desc limit 0
+    | order by pk asc limit 0

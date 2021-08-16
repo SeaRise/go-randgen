@@ -26,9 +26,14 @@ arg:
    t1.x1 | t2.x2 | t1.x2 | t2.x1 | _digit
 
 func:
-   arg + arg |
-   arg - arg |
+   arg       |
+   arg = arg |
    - arg |
-   arg * arg |
-   arg / arg 
+   arg >= arg |
+   arg <= arg  |
+   arg != arg |
+   arg <=> arg |
+   arg <> arg
+
+
 

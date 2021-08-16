@@ -114,21 +114,21 @@ condition_join_column:
 
 condition_common:
     condition_null
-#    | common_func
+    | common_func
     | condition_between
     | condition_in
     | field_random operation value_random
 
 condition_null:
     case t1. _field when null then null end
-#    | case t1. _field when t1. _field_int / t1. _field_int then null end
+    | case t1. _field when t1. _field_int / t1. _field_int then null end
     | case when null then t1. _field end
     | case when t1. _field then t1. _field end
     | case when t1. _field then t1. _field else t1. _field end
     | case when common_func then condition_between else t1. _field end
     | case when condition_between then condition_between end
     | ifnull(null,t1. _field)
-#    | ifnull(t1. _field_int / t1. _field_int, t1. _field)
+    | ifnull(t1. _field_int / t1. _field_int, t1. _field)
     | nullif(null,t1. _field) is null
     | if(null,t1. _field,t1. _field)
     | if(t1. _field,null,null)

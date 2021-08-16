@@ -10,13 +10,13 @@ select:
 
     | SELECT col_list FROM _table  t1 join_type_on _table t2 on condition join_type_on _table t3 on t2. _field operation t3. _field
     | SELECT hint_begin hint_name (t1,t2) */ col_list FROM _table  t1 join_type_on _table t2 on condition join_type_on _table t3 on t2. _field operation t3. _field
-    | SELECT col_list FROM _table  t1 join_type_where _table t2 where condition join_type_where _table t3 where t2. _field operation t3. _field
-    | SELECT hint_begin hint_name (t1,t2) */ col_list FROM _table  t1 join_type_where _table t2 where condition join_type_where _table t3 where t2. _field operation t3. _field
+#    | SELECT col_list FROM _table  t1 join_type_where _table t2 where condition join_type_where _table t3 where t2. _field operation t3. _field
+#    | SELECT hint_begin hint_name (t1,t2) */ col_list FROM _table  t1 join_type_where _table t2 where condition join_type_where _table t3 where t2. _field operation t3. _field
 
-    | SELECT col_list FROM _table  t1 join_type_on _table t2 on condition join_type_where _table t3 where t2. _field operation t3. _field
-    | SELECT hint_begin hint_name (t1,t2) */ col_list FROM _table  t1 join_type_on _table t2 on condition join_type_where _table t3 where t2. _field operation t3. _field
-    | SELECT col_list FROM _table  t1 join_type_where _table t2 where condition join_type_on _table t3 on t2. _field operation t3. _field
-    | SELECT hint_begin hint_name (t1,t2) */ col_list FROM _table  t1 join_type_where _table t2 where condition join_type_on _table t3 on t2. _field operation t3. _field
+#    | SELECT col_list FROM _table  t1 join_type_on _table t2 on condition join_type_where _table t3 where t2. _field operation t3. _field
+#    | SELECT hint_begin hint_name (t1,t2) */ col_list FROM _table  t1 join_type_on _table t2 on condition join_type_where _table t3 where t2. _field operation t3. _field
+#    | SELECT col_list FROM _table  t1 join_type_where _table t2 where condition join_type_on _table t3 on t2. _field operation t3. _field
+#    | SELECT hint_begin hint_name (t1,t2) */ col_list FROM _table  t1 join_type_where _table t2 where condition join_type_on _table t3 on t2. _field operation t3. _field
 
 
 hint_name:
@@ -40,39 +40,20 @@ join_type_where:
      | natural left join
      | natural right join
 
-
-col_list0:
-    max(t1. _field_int), min(t1. _field_int), sum(t1. _field_int), count(t1. _field_int), bit_and(t1. _field_int), bit_or(t1. _field_int), bit_xor(t1. _field_int), round(stddev_samp(t1. _field_int), 4), round(var_samp(t1. _field_int), 4), round(avg(t1. _field_int), 4)
-
-col_list1:
-    count(distinct(t1. _field)), count(distinct t1. _field,t1. _field)
-
-col_list2:
-    t1.pk, t2.pk, exists (SELECT * from _table t where t. _field = t1. _field)
-
-col_list3:
-    t1.pk, t2.pk, (SELECT count(*) from _table t3 where t3. _field_int > t2. _field_int)
-
-col_list4:
-    count(*)
-
-col_list5:
-    t1.pk, t2.pk, case when t1. _field_int < _int then 0 else 1 end
-
 col_list:
-    *
+    count(*)
 
 hint_begin:
     /*+
 
 operation:
-    +
-    | -
-    | *
-    | /
+#    +
+#    | -
+#    | *
+    /
     | %
-    | >>
-    | <<
+#    | >>
+#    | <<
     | >
     | >=
     | <
@@ -81,7 +62,7 @@ operation:
     | <>
     | <=>
     | !=
-    | ^
+#    | ^
 
 condition:
     condition_join_column
@@ -106,14 +87,14 @@ condition_common:
 
 condition_null:
     case t1. _field when null then null end
-    | case t1. _field when t1. _field_int / t1. _field_int, t1. _field then null end
+    | case t1. _field when t1. _field_int operation t1. _field_int then null end
     | case when null then t1. _field end
     | case when t1. _field then t1. _field end
     | case when t1. _field then t1. _field else t1. _field end
     | case when common_func then condition_between else t1. _field end
     | case when condition_between then condition_between end
     | ifnull(null,t1. _field)
-    | ifnull(t1. _field_int / t1. _field_int, t1. _field)
+    | ifnull(t1. _field_int operation t1. _field_int, t1. _field)
     | nullif(null,t1. _field) is null
     | if(null,t1. _field,t1. _field)
     | if(t1. _field,null,null)
@@ -211,20 +192,20 @@ num_func:
     field_random operation field_random
     | field_random operation value_random
     | abs(field_random)
-    | acos(field_random)
-    | asin(field_random)
-    | atan(field_random)
+#    | acos(field_random)
+#    | asin(field_random)
+#    | atan(field_random)
+#    | cos(field_random)
+#    | cot(field_random)
+#    | tan(field_random)
+#    | sin(field_random)
     | ceil(field_random)
     | ceiling(field_random)
-    | cos(field_random)
-    | cot(field_random)
     | crc32(field_random)
     | floor(field_random)
     | round(field_random)
     | sign(field_random)
-    | sin(field_random)
     | sqrt(field_random)
-    | tan(field_random)
 
 common_func:
     str_func

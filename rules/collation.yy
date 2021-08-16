@@ -10,16 +10,16 @@
 
 # select aggregation(expression1) from table1 join table2 where expression2 group expression3
 query:
-    select agg_expression from _table as t1 join_type_on _table as t2 on expression
-    | select agg_expression from _table as t1 join_type_on _table as t2 on expression having having_exp
-    | select agg_expression from _table as t1 where t1. _field_char not in (select _field_char from _table as t2 where expression)
-    | select agg_expression from _table as t1 where t1. _field_char in (select _field_char from _table as t2 where expression)
-    | select agg_expression from _table as t1 where not exists (select _field_char from _table as t2 where expression)
-    | select agg_expression from _table as t1 where exists (select _field_char from _table as t2 where expression)
-    | select agg_expression from _table as t1 where t1. _field_char comparison sub_query_modifier (select _field_char from _table as t2 where expression)
-    | select agg_expression from _table as t1 where t1. _field_char comparison sub_query_modifier (select _field_char from _table as t2 where expression)
-    | select agg_expression from _table as t1 where t1. _field_char comparison (select _field_char from _table as t2 where expression order_by_limit1)
-    | select agg_expression from _table as t2 where t2. _field comparison (select agg_expression  from _table as t1 having having_exp)
+    {column_prefix1="t1.";column_prefix2="t2."} select agg_expression from _table as t1 join_type_on _table as t2 on expression
+    | {column_prefix1="t1.";column_prefix2="t2."} select agg_expression from _table as t1 join_type_on _table as t2 on expression having having_exp
+    # 子查询需要保证 projection 项中包含的列属于 t1；同时要保证子查询中有一部分条件是关联的
+    | {column_prefix1="t1.";column_prefix2=""} select agg_expression from _table as t1 where t1. _field_char not in (select _field_char from _table as t2 where expression)
+    | {column_prefix1="t1.";column_prefix2=""} select agg_expression from _table as t1 where t1. _field_char in (select _field_char from _table as t2 where expression)
+    | {column_prefix1="t1.";column_prefix2=""} select agg_expression from _table as t1 where not exists (select _field_char from _table as t2 where expression)
+    | {column_prefix1="t1.";column_prefix2=""} select agg_expression from _table as t1 where exists (select _field_char from _table as t2 where expression)
+    | {column_prefix1="t1.";column_prefix2=""} select agg_expression from _table as t1 where t1. _field_char comparison sub_query_modifier (select _field_char from _table as t2 where expression)
+    | {column_prefix1="t1.";column_prefix2=""} select agg_expression from _table as t1 where t1. _field_char comparison sub_query_modifier (select _field_char from _table as t2 where expression)
+    | {column_prefix1="t1.";column_prefix2=""} select agg_expression from _table as t1 where t1. _field_char comparison (select _field_char from _table as t2 where expression order_by_limit1)
 #    # having
 #    | select agg_expression as x from _table as t1 group by t1. _field_char having x not in (select _field_char from _table as t2 where aggregation_condition)
 #    | select agg_expression as x from _table as t1 group by t1. _field_char having x not in (select _field_char from _table as t2 where condition)
@@ -50,25 +50,8 @@ having_exp:
     | if(null,agg_expression,agg_expression)
     | if( agg_expression,null,null)
 
-join_type_on:
-    inner join
-    | cross join
-    | left join
-    | right join
-
-agg_func:
-    count(
-    | max(
-    | min(
-
-agg_operator:
-    agg_func
-    | agg_func distinct
-
 agg_operator_v:
-    t1. _field_char
-    | t1. _field_char
-    | t1. _field_char
+    column_values_str
     | const_value
     | ret_num_func
     | ret_str_func
@@ -78,36 +61,41 @@ agg_operator_v:
 agg_expression:
     agg_operator agg_operator_v)
     | count(*)
-    | count(distinct agg_operator_v,agg_operator_v)
-    | count(distinct agg_operator_v,agg_operator_v,agg_operator_v)
+# skip for a known issue
+#    | count(distinct agg_operator_v,agg_operator_v)
+#    | count(distinct agg_operator_v,agg_operator_v,agg_operator_v)
+
+column_str:
+    { print(column_prefix1)} _field_char
+    | { print(column_prefix2) }  _field_char
+
+column_values_str:
+    const_str_value
+    | column_str
+    | column_str
+    | column_str
+    | column_str
+    | column_str
+    | column_str
 
 str_expression:
-    t1. _field_char is_operator
-    | t1. _field_char like_operator
-    | t1. _field_char in_operator
-    | t1. _field_char between_operator
-    | t1. _field_char between_operator
-    | ret_num_func comparison t1. _field_int
+    column_str is_operator
+    | column_str like_operator
+    | column_str in_operator
+    | column_str between_operator
     | ret_num_func comparison const_int_value
-    | ret_str_func comparison t1. _field_char
-    | ret_str_func comparison const_str_value
-    | t1. _field_char comparison t1. _field_char
-    | const_str_value comparison t1. _field_char
-    | t1. _field_char comparison t1. _field_char
-    | const_str_value comparison t1. _field_char
-    | t2. _field_char comparison t1. _field_char
-    | const_str_value comparison t2. _field_char
-    | t1. _field_char comparison t2. _field_char
-    | const_str_value comparison t2. _field_char
-    | t1. _field_char comparison t2. _field_char
-    | const_str_value comparison t2. _field_char
+    | ret_str_func comparison column_values_str
+    | column_values_str comparison column_values_str
+    | column_values_str comparison column_values_str
+    | column_values_str comparison column_values_str
+    | column_values_str comparison column_values_str
+    | column_values_str comparison column_values_str
 
 
 if_when_expression:
-    if(str_expression,func_str_v,func_str_v)
-    | case when str_expression then func_str_v end
-    | case when str_expression then func_str_v else func_str_v end
-
+    if(str_expression,column_values_str,column_values_str)
+    | case when str_expression then column_values_str end
+    | case when str_expression then column_values_str else column_values_str end
 
 expression:
     str_expression
@@ -123,33 +111,10 @@ expression:
     | not ((if_when_expression) comparison (if_when_expression))
     | (str_expression) logical_operator (str_expression)
 
-# not
-logical_operator:
-    and
-    | or
-    | xor
-
-comparison:
-    =
-    | >
-    | <
-    | <>
-    | >=
-    | <=
-    | !=
-#    | <=>
-
 is_operator:
     is is_operator_v
     | is not is_operator_v
 
-is_operator_v:
-    null
-    | unknown
-#    | true
-#    | false
-
-# todo strcmp
 like_operator:
     like like_operator_v
     | not like like_operator_v
@@ -169,47 +134,33 @@ in_operator:
     | not in ( in_operator_v )
 
 in_operator_v:
-    const_str_value
-    | t1. _field_char, t1. _field_char, t1. _field_char
-    | t1. _field_char, const_str_value
-    | t2. _field_char, t2. _field_char, t2. _field_char
-    | t2. _field_char, const_str_value
-    | t1. _field_char, t2. _field_char, const_str_value
-    | t1. _field_char, t2. _field_char, t2. _field_char
-    | t2. _field_char, const_str_value, const_str_value, const_str_value, const_str_value, const_str_value
+    column_values_str
+    | column_values_str, column_values_str
+    | column_values_str, column_values_str, column_values_str
+    | column_values_str, column_values_str, column_values_str
+    | column_values_str, column_values_str, column_values_str
+    | column_values_str, column_values_str, column_values_str, column_values_str
+
 
 between_operator:
-    between between_operator_v and between_operator_v
-    | not between between_operator_v and between_operator_v
-
-between_operator_v:
-    const_str_value
-    | t1. _field_char
-    | t2. _field_char
+    between column_values_str and column_values_str
+    | not between column_values_str and column_values_str
 
 ret_num_func:
-    strcmp(func_str_v,func_str_v)
-    | find_in_set(func_str_v,func_str_v)
-    | instr(func_str_v,func_str_v)
-    | locate(func_str_v,func_str_v)
-    | char_length(func_str_v)
-    | length(func_str_v)
+    strcmp(column_values_str,column_values_str)
+    | find_in_set(column_values_str,column_values_str)
+    | instr(column_values_str,column_values_str)
+    | locate(column_values_str,column_values_str)
+    | char_length(column_values_str)
+    | length(column_values_str)
 
 ret_str_func:
-    concat(func_str_v,func_str_v)
-    | ifnull(func_str_v,func_str_v)
-#    | if(strcmp(func_str_v,func_str_v),func_str_v,func_str_v)
-#    | case when strcmp(func_str_v,func_str_v) then func_str_v end
-#    | case when strcmp(func_str_v,func_str_v) then func_str_v else func_str_v end
-    | nullif(func_str_v,func_str_v)
-    | case func_str_v when func_str_v then func_str_v end
-    | case func_str_v when func_str_v then func_str_v else func_str_v end
+    concat(column_values_str,column_values_str)
+    | ifnull(column_values_str,column_values_str)
+    | nullif(column_values_str,column_values_str)
+    | case column_values_str when column_values_str then column_values_str end
+    | case column_values_str when column_values_str then column_values_str else column_values_str end
 
-
-func_str_v:
-    const_str_value
-    | t1. _field_char
-    | t2. _field_char
 
 const_value:
     const_str_value
@@ -230,6 +181,7 @@ const_int_value:
     | -1
     | 10
     | _tinyint
+    | NULL
 
 const_str_value:
     _english
@@ -244,10 +196,45 @@ const_str_value:
 order_by_limit1:
     order by pk desc limit 1
     | order by pk asc limit 1
-    | order by pk desc limit 0
-    | order by pk asc limit 0
 
 sub_query_modifier:
     some
     | any
     | all
+
+# not
+logical_operator:
+    and
+    | or
+    | xor
+
+comparison:
+    =
+    | >
+    | <
+    | <>
+    | >=
+    | <=
+    | !=
+#    | <=>
+
+is_operator_v:
+    null
+    | unknown
+#    | true
+#    | false
+
+join_type_on:
+    inner join
+    | cross join
+    | left join
+    | right join
+
+agg_func:
+    count(
+    | max(
+    | min(
+
+agg_operator:
+    agg_func
+    | agg_func distinct

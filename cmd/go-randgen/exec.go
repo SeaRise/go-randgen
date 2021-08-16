@@ -20,6 +20,7 @@ import (
 var dsn1 string
 var dsn2 string
 var order bool
+var ci bool
 var dumpDir string
 var defaultSystemVariables map[string]string
 
@@ -48,6 +49,8 @@ func newExecCmd() *cobra.Command {
 	execCmd.Flags().StringVar(&dsn2, "dsn2", "", "another compare mysql dsn")
 	execCmd.Flags().BoolVar(&order, "order",
 		false, "compare sql result with order")
+	execCmd.Flags().BoolVar(&ci, "ci",
+		false, "compare sql result with case insensitive")
 	execCmd.Flags().StringVar(&dumpDir, "dump",
 		"dump", "inconsistent sqls dump directory")
 
@@ -212,7 +215,7 @@ func execAction(cmd *cobra.Command, args []string) {
 
 	sqlIter := getIter(keyf)
 	err = sqlIter.Visit(sql_generator.FixedTimesVisitor(func(_ int, sql string) {
-		consistent, dsn1Res, dsn2Res := compare.BySql(sql, db1, db2, !order)
+		consistent, dsn1Res, dsn2Res := compare.BySql(sql, db1, db2, !order,ci)
 		if !consistent {
 			log.Println("not consistent", sql, dsn1Res.String(), dsn2Res.String())
 			visitor(sql, dsn1Res, dsn2Res)

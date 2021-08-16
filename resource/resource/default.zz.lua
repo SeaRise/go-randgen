@@ -1,29 +1,25 @@
 tables = {
-       -- names => ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z', 'AA', 'BB', 'CC', 'DD', 'EE', 'FF', 'GG', 'HH', 'II', 'JJ', 'KK', 'LL', 'MM', 'NN', 'OO', 'PP'],
-        -- support 0
-        rows = {1, 10, 20, 25, 50, 75, 100},
-        charsets = {'utf8', 'latin1', 'binary'},
-        partitions = {'undef'},
+    rows = { 1, 10, 20, 25, 50, 75, 100 },
+    charsets = { 'utf8mb4 collate=utf8mb4_general_ci', 'utf8mb4 collate = utf8mb4_bin', 'latin1', 'binary' },
+    partitions = { 'undef' },
 };
 
 fields = {
-    types = {'int', 'tinyint', 'smallint', 'bigint', 'decimal(40, 20)',
-     'float', 'double', 'char(20)', 'varchar(20)', 'enum', 'set', 'datetime',
-      'bool',  'timestamp', 'year', 'date'},
-
-    sign = {'signed', 'unsigned'},
-    keys= {'key','undef'}
+    -- The four BLOB types are TINYBLOB, BLOB, MEDIUMBLOB, and LONGBLOB.
+    -- The four TEXT types are TINYTEXT, TEXT, MEDIUMTEXT, and LONGTEXT.
+    types = { 'int',
+              'char(20)', 'varchar(20)', 'binary(20)', 'varbinary(20)',
+        --              'enum', 'set',
+        -- todo key blob and text prefix
+        --      'tinyblob','blob','mediumblob','longblob',
+        --      'tinytext','text','mediumtext','longtext',
+    },
+    sign = { 'signed', 'unsigned' },
+    keys = { 'key', 'undef' }
 }
 
 data = {
-    numbers = {'null', 'tinyint',
-        '12.991', '1.009', '-9.183','0','-1','1'
-    },
-    enum={'"y"','"b"','1','"x"','"null"'},
-     bool = {1, 0, null},
-       year = {'null', 'year'},
-       datetime = {'null', 'datetime'},
-       timestamp = {'null', 'datetime'},
-       date = {'null', 'date'},
-       strings = {'null', 'letter', 'english','1','0'},
+    --   enum = { '"y"', '"b"', '"Abc"', '"null"' },
+    numbers = { 'null', 'tinyint', '0', '-1', '1', '10', '20' },
+    strings = { 'null', 'english', 'english', 'english', 'english', 'english', 'english', 'english' },
 }

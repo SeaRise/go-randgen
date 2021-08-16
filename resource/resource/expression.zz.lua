@@ -1,7 +1,7 @@
 tables = {
     rows = {1, 10, 20, 30, 90},
     -- SHOW CHARACTER SET;
-    charsets = {'utf8'},
+    charsets = {'utf8',''},
     -- partition number
     partitions = {'undef'},
 }

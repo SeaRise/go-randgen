@@ -7,8 +7,8 @@ field_ret1:
     | _field
     | _field_char
 # tidb panic bug
-#    | _time
-#    | _datetime
+    | _time
+    | _datetime
 
 field_ret1_m:
     field_ret1
@@ -56,17 +56,17 @@ func_num:
 #    | acos(
 #    | asin(
 #    | atan(
-    | ceil(
-    | ceiling(
+#    | sin(
+#    | sqrt(
+#    | tan(
 #    | cos(
 #    | cot(
+    | ceil(
+    | ceiling(
     | crc32(
     | floor(
     | round(
     | sign(
-#    | sin(
-#    | sqrt(
-#    | tan(
     | isnull(
 
 value_random_num:
@@ -241,7 +241,8 @@ simple_group_by:
 # select sum(distinct a+b) from t group by a;
 # hash_agg stream_agg
 query:
-    variable_set; simple_group_by
+    simple_group_by
+#    | variable_set; simple_group_by
 
 variable_set:
     set @@tidb_allow_batch_cop=0

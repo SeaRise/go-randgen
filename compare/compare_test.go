@@ -249,5 +249,5 @@ func TestSimplePrint(t *testing.T)  {
 	assert.Equal(t, nil, res1.err)
 	assert.Equal(t, nil, res2.err)
 
-	fmt.Println(res1.Res.NonOrderEqualTo(res2.Res))
+	fmt.Println(res1.Res.NonOrderEqualTo(res2.Res,false))
 }
