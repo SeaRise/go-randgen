@@ -63,8 +63,8 @@ for c in "${!run_cases[@]}"; do
   host2=$(echo ${hp2%)*} | awk -F ':' '{print $1}')
   port2=$(echo ${hp2%)*} | awk -F ':' '{print $2}')
   user2=${dsn2%%:*}
-  mysql -u $user1 -h $host1 -P $port1 -e "drop database if exists $db1;create database $db1"
-  mysql -u $user2 -h $host2 -P $port2 -e "drop database if exists $db2;create database $db2"
+  mysql -u $user1 -h $host1 -P $port1 -e "drop database if exists \`$db1\`;create database \`$db1\`"
+  mysql -u $user2 -h $host2 -P $port2 -e "drop database if exists \`$db2\`;create database \`$db2\`"
 
   ./go-randgen gendata --dsns "${dsn1}/${db1},${dsn2}/${db2}" -Z "${run_cases[$c]}"
   sleep 60
@@ -81,10 +81,12 @@ for c in "${!run_cases[@]}"; do
   if [ -z "$skip_erros" ]; then
     if [ ! -z "$(ls -A $dump)" ]; then
       echo "$c failed. detail faile log is $download_file"
+      exit 3
     fi
   else
     if [ ! -z $(grep -EL "$skip_errors") ]; then
       echo "$c failed. detail faile log is $download_file"
+      exit 3
     fi
   fi
 done

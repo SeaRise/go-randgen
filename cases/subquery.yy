@@ -15,9 +15,12 @@ agg_func_distinct_para1:
     | max( distinct
     | count( distinct
 
+agg_func:
+    num_agg_func_distinct_para1
+    | agg_func_distinct_para1
+
 subquery_operator:
     ANY
-    | IN
     | SOME
     | ALL
 
@@ -30,42 +33,28 @@ order_by:
     | order by pk asc
 
 scalar_q:
-    SELECT _field from _table where  limit order_by  1
-    | SELECT num_agg_func_distinct_para1 tx1. _field_int ) from _table as tx1
-    | SELECT agg_func_distinct_para1 tx1. _field ) from _table as tx1
+    SELECT _field from _table as t1 where condition  order_by  limit 1
+    | SELECT num_agg_func_distinct_para1 t1. _field_int ) from _table as t1 where condition
+    | SELECT agg_func_distinct_para1 t1. _field ) from _table as t1 where condition
 
 
 column_q:
-    SELECT _field from _table
+    SELECT _field from _table as t1 where condition
 
-column_r:
-    multiple row compare
 
+field_t2_random:
+    t2. _field_int
+    | t2. _field_char
+    | null
+
+# correlated_subquery
+# derived_table
 select:
-    SELECT ( scalar_q )
-    | SELECT col_list from _table where expression operation scalar_q
-    | SELECT col_list from _table where _field comparison_operation subquery_operator ( column_q)
-    | SELECT col_list from _table where subquery_operator2 ( subquery common)
+    SELECT col_list from _table as t2 where field_t2_random operation ( scalar_q )
+    | SELECT col_list from _table as t2 where field_t2_random comparison_operation subquery_operator ( column_q)
+    | SELECT col_list from _table as t2 where field_t2_random in ( column_q)
+    | SELECT col_list from _table as t2 where subquery_operator2 ( column_q )
 
-correlated_subquery
-
-derived_table
-
-hint_name:
-    inl_merge_join
-    | inl_hash_join
-    | hash_join
-    | merge_join
-    | inl_join
-
-join_type_on:
-    inner join
-    | cross join
-    | left join
-    | right join
-    | left outer join
-    | right outer join
-    | STRAIGHT_JOIN
 
 join_type_where:
      natural join
@@ -73,26 +62,14 @@ join_type_where:
      | natural right join
 
 
-col_list0:
-    max(t1. _field_int), min(t1. _field_int), sum(t1. _field_int), count(t1. _field_int), bit_and(t1. _field_int), bit_or(t1. _field_int), bit_xor(t1. _field_int), round(stddev_samp(t1. _field_int), 4), round(var_samp(t1. _field_int), 4), round(avg(t1. _field_int), 4)
-
-col_list1:
-    count(distinct(t1. _field)), count(distinct t1. _field,t1. _field)
-
-col_list2:
-    t1.pk, t2.pk, exists (SELECT * from _table t where t. _field = t1. _field)
-
-col_list3:
-    t1.pk, t2.pk, (SELECT count(*) from _table t3 where t3. _field_int > t2. _field_int)
-
-col_list4:
-    count(*)
-
-col_list5:
-    t1.pk, t2.pk, case when t1. _field_int < _int then 0 else 1 end
-
 col_list:
     *
+    | agg_func agg_field )
+    | hint_begin hash_agg() */ agg_func agg_field )
+    | hint_begin stream_agg() */ agg_func agg_field )
+
+agg_field:
+    t2. _field_int
 
 hint_begin:
     /*+
@@ -107,17 +84,17 @@ comparison_operation:
     | !=
 
 operation:
-    +
-    | -
-    | *
-    | /
-    | %
-    | >>
-    | <<
-    | <=>
-    | ^
-    | like
-    | comparison_operation
+#    like
+#    | +
+#    | -
+#    | *
+#    | /
+#    | %
+#    | >>
+#    | <<
+#    | <=>
+#    | ^
+    comparison_operation
 
 condition:
     condition_join_column
@@ -132,13 +109,15 @@ condition:
 
 
 condition_join_column:
-    t1. _field operation t2. _field
+    t1. _field_int operation t2. _field_int
+    | t1. _field_char operation t2. _field_char
 
 condition_common:
     condition_null
     | common_func
     | condition_between
     | condition_in
+    | field_random operation value_random
 
 condition_null:
     case t1. _field when null then null end
