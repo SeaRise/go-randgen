@@ -15,10 +15,9 @@ RUN GOOS=linux GOARCH=amd64 make bin
 
 FROM pingcap/alpine-glibc:3.10
 
-RUN apk add --no-cache dumb-init tzdata bash curl mysql-client
+RUN apk add --no-cache bash curl mysql-client
 
 COPY --from=builder /workspace/go-randgen /go-randgen
 COPY --from=builder /workspace/resource /resource
 COPY --from=builder /workspace/cases /cases
-ENTRYPOINT [ "/usr/bin/dumb-init" ]
-CMD ["/go-randgen"]
+COPY --from=builder /workspace/run.sh /run.sh
