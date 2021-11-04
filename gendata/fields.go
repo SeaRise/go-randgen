@@ -37,7 +37,7 @@ var canUnSign = map[string]bool{
 	"decimal":   true,
 }
 
-const enumVals = "('y','b','Abc','null')"
+const enumVals = "('y','b','Abc','null','1','2','0')"
 
 var fieldFuncs = map[string]func(text string, fname string, ctx *fieldExec, z *ZzConfig) (target string,
 	ignore bool, extraStmt *string, err error){
