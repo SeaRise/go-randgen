@@ -1,11 +1,11 @@
-gDZsZzsmZ7
-GdzSzZSMz7
-YmkSn8R0K2
-yMKsN8r0k2
-S160w9vpFH
-s160W9VPfh
-jlsfJliGfs
-JLSFjLIgFS
+gDZs
+GdzS
+YmkS
+yMKs
+S160
+s160
+jlsf
+JLSF
 null
 y
 Y
@@ -13,9 +13,19 @@ b
 B
 abc
 Abc
+gg \n
+cc \0
+ee \t
+\t gg \n
+\t cc \0
+\t ee \t
+b # c
+B # y
+
+ B
 1
 0
 -1
 10
-20
+4
 😉
