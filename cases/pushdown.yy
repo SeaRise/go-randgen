@@ -77,7 +77,7 @@ num_func3:
     | round(expression)
 # https://github.com/pingcap/tics/issues/3333
 #    | round(expression,expression)
-    | round(expression,little_value_random)
+    | round(expression,little_param_random)
 
 str_func2:
     trim(column_values_str)
@@ -103,7 +103,7 @@ num_func2:
     | round(column_values_str)
 # https://github.com/pingcap/tics/issues/3333
 #    | round(column_values_str,column_values_str)
-    | round(column_values_str,little_value_random)
+    | round(column_values_str,little_param_random)
 
 str_func:
     trim(param_random)
@@ -129,7 +129,7 @@ num_func:
     | round(param_random)
 # https://github.com/pingcap/tics/issues/3333
 #    | round(param_random,field_random)
-    | round(param_random,little_value_random)
+    | round(param_random,little_param_random)
 
 groupc_exp:
     t1. _field

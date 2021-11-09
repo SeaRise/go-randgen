@@ -11,7 +11,7 @@ RUN go mod download
 COPY . .
 
 # Build
-RUN GOOS=linux GOARCH=amd64 make bin
+RUN GOOS=linux GOARCH=amd64 make resource  & make bin
 
 FROM pingcap/alpine-glibc:3.10
 

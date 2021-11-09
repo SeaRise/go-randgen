@@ -16,10 +16,10 @@ debug:
 	go build -o go-randgen-debug -gcflags "-N -l" cmd/go-randgen/*.go
 
 build_image:
-	docker build . -t hub.pingcap.net/lilinghai/go-randgen
+	sudo docker build . -t hub.pingcap.net/lilinghai/go-randgen
 
 push_image:
-	docker push hub.pingcap.net/lilinghai/go-randgen
+	sudo docker push hub.pingcap.net/lilinghai/go-randgen
 
 darwin: # cross compile to mac
 	GOOS=darwin GOARCH=amd64 go build -o go-randgen-darwin cmd/go-randgen/*.go

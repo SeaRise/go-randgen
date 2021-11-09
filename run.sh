@@ -24,6 +24,23 @@ queries=$4
 ignore_errors=$5
 
 cases2=""
+save () {
+  date_t=$(TZ=Asia/Shanghai date '+%H-%M-%S')
+  tar czf ${dump}.tar.gz $dump
+  curl -F lilinghai/tiflash-test/go-randgen/${date_d}/${dump}-${date_t}.tar.gz=@${dump}.tar.gz http://fileserver.pingcap.net/upload
+  download_file="http://fileserver.pingcap.net/download/lilinghai/tiflash-test/go-randgen/${date_d}/${dump}-${date_t}.tar.gz"
+  if [ -z "$skip_erros" ]; then
+    if [ ! -z "$(ls -A $dump)" ]; then
+      echo "$c failed. detail faile log is $download_file"
+      exit 3
+    fi
+  else
+    if [ ! -z $(grep -EL "$skip_errors") ]; then
+      echo "$c failed. detail faile log is $download_file"
+      exit 3
+    fi
+  fi
+}
 declare -A run_cases
 if [ 'all' = "$cases" ]; then
   for f in cases/*.yy; do
@@ -73,20 +90,7 @@ for c in "${!run_cases[@]}"; do
   if [[ "$c" =~ "collation" ]]; then
     ci=true
   fi
-  rm -rf $dump && ./go-randgen exec --skip-zz -Y cases/${c}.yy --dsn1 "${dsn1}/${db1}?tidb_isolation_read_engines=tikv" --dsn2 "${dsn2}/${db2}?tidb_isolation_read_engines=tiflash" -Q $queries --dump $dump --ci $ci
-  date_t=$(TZ=Asia/Shanghai date '+%H-%M-%S')
-  tar czf ${dump}.tar.gz $dump
-  curl -F lilinghai/tiflash-test/go-randgen/${date_d}/${dump}-${date_t}.tar.gz=@${dump}.tar.gz http://fileserver.pingcap.net/upload
-  download_file="http://fileserver.pingcap.net/download/lilinghai/tiflash-test/go-randgen/${date_d}/${dump}-${date_t}.tar.gz"
-  if [ -z "$skip_erros" ]; then
-    if [ ! -z "$(ls -A $dump)" ]; then
-      echo "$c failed. detail faile log is $download_file"
-      exit 3
-    fi
-  else
-    if [ ! -z $(grep -EL "$skip_errors") ]; then
-      echo "$c failed. detail faile log is $download_file"
-      exit 3
-    fi
-  fi
+  trap "save" 1 2 3 15 19
+  rm -rf $dump && ./go-randgen exec --skip-zz -Y cases/${c}.yy --dsn1 "${dsn1}/${db1}?tidb_isolation_read_engines=tikv" --dsn2 "${dsn2}/${db2}?tidb_isolation_read_engines=tiflash&tidb_enforce_mpp=on" -Q $queries --dump $dump --ci $ci
+  save
 done
