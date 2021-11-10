@@ -40,6 +40,7 @@ save () {
       exit 3
     fi
   fi
+  exit 0
 }
 declare -A run_cases
 if [ 'all' = "$cases" ]; then
