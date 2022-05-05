@@ -25,5 +25,5 @@ data = {
         'decimal',
     },
     -- 字符串字段的生成方案
-    strings = {'null', 'letter', 'english'},
+    strings = {'null', 'letter'},
 }
