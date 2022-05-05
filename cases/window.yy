@@ -5,7 +5,7 @@ query:
 
 select:
     SELECT
-           window_function,
+           window_function_with_window_name,
            fieldA,
            fieldB
     FROM (
@@ -13,12 +13,24 @@ select:
 	FROM _table
     ) as t
     WINDOW window_name AS (window_spec)
+    | SELECT
+           window_function,
+           fieldA,
+           fieldB
+    FROM (
+	SELECT _field AS fieldA, _field AS fieldB
+	FROM _table
+    ) as t
 
 window_function:
-           DENSE_RANK() over_clause AS 'dense_rank'
-           | RANK() over_clause AS 'rank'
-           | ROW_NUMBER() over_clause AS 'row_number'
+           DENSE_RANK() OVER (window_spec) AS 'dense_rank'
+           | RANK() OVER (window_spec) AS 'rank'
+           | ROW_NUMBER() OVER (window_spec) AS 'row_number'
 
+window_function_with_window_name:
+                            DENSE_RANK() OVER window_name AS 'dense_rank'
+                            | RANK() OVER window_name AS 'rank'
+                            | ROW_NUMBER() OVER window_name AS 'row_number'
 
 window_clause:
 	window_name AS (window_spec)
@@ -43,7 +55,3 @@ order_clause:
 
 order_clause_indication:
 	ASC | DESC
-
-over_clause:
-	OVER (window_spec) | OVER window_name
-
