@@ -42,7 +42,6 @@ window_spec:
 	partition_clause order_clause
 	| partition_clause order_clause
 	| partition_clause order_clause
-	| window_name partition_clause order_clause
 
 partition_clause:
 	PARTITION BY LOWER(fieldB)
